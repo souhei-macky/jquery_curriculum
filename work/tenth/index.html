@@ -26,6 +26,86 @@
     </div>
     <script src="../../common/js/jquery.js"></script>
     <script>
+      $(function() {
+        $('#js-search-button').click(function() {
+          $('.lists').empty();
+          $('.message').remove();
+          $('.js-pager').remove();
+          var searchWord = $('#js-search-word').val();
+          if (searchWord == "") {
+            // (searchWord == /[!=]{,1}/) 
+            //上記条件式で'searchWordの文字数の合計が1文字以下ならtrue'を正規表現を使って表したい
+            //問10の条件に入ってはいないので一度飛ばすことにする
+            var message = 
+              `<div class='message'>検索文字が空になっています。</div>`;
+              $('.search').after(message);
+          } else {
+            $.ajax({
+              url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
+              type: 'GET',
+              datatpye: 'json',
+              data: {
+                keyword: searchWord,
+                applicationId: '1019399324990976605',
+                booksGenreId: '001',
+                page: 3,
+                hits: 20
+              },
+            })
+            .done(function(data) {
+              // console.log(data);
+              if(data.hits === 0){
+                var message = 
+                `<div class='message'>検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</div>`;
+                $('.search').after(message);
+              } else {
+                $.each(data.Items, function item(index, value) {
+                  var url = value.Item.itemUrl;
+                  var image = value.Item.largeImageUrl;
+                  var title = value.Item.title;
+                  var author = value.Item.author;
+                  var publisherName = value.Item.publisherName;
+                  var items =
+                  `<li class='lists__item'>
+                    <div class='lists__item__inner'>
+                      <a href='${url}' class='lists__item__link' target='_blank'>
+                        <img src='${image}' class='lists__item__img' alt=''>
+                        <p class='lists__item__detail'>作品名：${title}</p>
+                        <p class='lists__item__detail'>作者　：${author}</p>
+                        <p class='lists__item__detail'>出版社：${publisherName}</p>
+                      </a>
+                    </div>
+                  </li>`;
+                  $('.lists').append(items);
+                });
+                var pager =
+                  `<div class="js-pager">
+                    <ul class="btn-wrapper">
+                      <li class="prev btn-item"><a class="btn-anchor" href="#">前へ</a></li>
+                      <li class="next btn-item"><a class="btn-anchor" href="#">次へ</a></li>
+                    </ul>
+                  </div>`
+                $('.lists').after(pager);
+                $('.prev').addClass('disabled');
+                $('.prev').click(function() {return false});
+                // if (ページの先頭だった場合) {
+                  // $('.prev').addClass('disabled');
+                  // $('.prev').click(function() {return false});
+                // } else if (ページの最後だった場合){
+                  // $('.next').addClass('disabled');
+                  // $('.next').click(function() {return false});
+                // } 
+                //上記ページャー機能は完成していません。
+              };
+            })
+            .fail(function(data) {
+              var message = 
+              `<div class='message'>データ通信に失敗しました。<br>接続を確認してください。</div>`;
+              $('.search').after(message);
+            });
+          };
+        });
+      });
       // 楽天ブックスの総合検索APIを使って製作してください。
       // answerの挙動を良く見てね！
       //
@@ -65,22 +145,22 @@
       //    </a>
       //  </div>
       // </li>
-      //
-      // 取得できた書籍の件数をもとに、ページャを作成しましょう
-      // ページャの条件
-      // ├ 「前へ」と「次へ」のボタンがある
-      // ├ 1ページ目では「前へ」に、最後のページでは「次へ」にdisabledクラスをつけて非活性（使用不能）にする
-      // └ 1ページしかない場合はどちらもdisabledクラスをつけて非活性にする
-      // 
-      // ページャのテンプレート
-      // <div class="js-pager">
-      //   <ul class="btn-wrapper">
-      //     <li class="prev btn-item"><a class="btn-anchor" href="">前へ</a></li>
-      //     <li class="next btn-item"><a class="btn-anchor" href="">次へ</a></li>
-      //   </ul>
-      // </div>
-      //
-      //
+      // //
+      // // 取得できた書籍の件数をもとに、ページャを作成しましょう
+      // // ページャの条件
+      // // ├ 「前へ」と「次へ」のボタンがある
+      // // ├ 1ページ目では「前へ」に、最後のページでは「次へ」にdisabledクラスをつけて非活性（使用不能）にする
+      // // └ 1ページしかない場合はどちらもdisabledクラスをつけて非活性にする
+      // // 
+      // // ページャのテンプレート
+      // // <div class="js-pager">
+      // //   <ul class="btn-wrapper">
+      // //     <li class="prev btn-item"><a class="btn-anchor" href="">前へ</a></li>
+      // //     <li class="next btn-item"><a class="btn-anchor" href="">次へ</a></li>
+      // //   </ul>
+      // // </div>
+      // //
+      // //
 
 
 

@@ -11,16 +11,24 @@
   </head>
   <body>
     <div class="wrapper">
-      <p class="modal-show">Click</p>
-      <div class="modal" style="display: none;">
+      <p class="modal-show" id="modal-show">Click</p>
+      <div class="modal" id='modal' style="display: none;">
         <div class="modal-content">
           <div class="modal-text">MODAL WINDOW</div>
-          <button type="button" class="modal-close">x</button>
+          <button type="button" class="modal-close" id='modal-close'>x</button>
         </div>
       </div>
     </div>
     <script src="../../common/js/jquery.js"></script>
     <script>
+      $(function() {
+        $('#modal-show').click(function() {
+          $('#modal').fadeIn(2000);
+        });
+        $('#modal-close').click(function() {
+          $('#modal').fadeOut(2000);
+        });
+      })
       // 今回やるのはモーダルです。
       // .modal-show をクリックすることで .modal をfadeInさせる。
       // .modal-close をクリックで .modal をfadeOutさせる。

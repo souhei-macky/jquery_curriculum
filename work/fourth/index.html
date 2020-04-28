@@ -31,7 +31,8 @@
         </li>
         <li>
           <p class="menu__list__title">Plant</p>
-          <ul class="menu__list__childList" style="display: none;">
+          <ul class="menu__list__childList"
+          style="display: none;">
             <li>
               <p class="menu__list__childList__title">Cedar</p>
             </li>
@@ -47,6 +48,13 @@
     </div>
     <script src="../../common/js/jquery.js"></script>
     <script>
+      $(function() {
+        $('.menu__list').children().hover(function() {
+          $(this).children().stop().slideDown();
+        }, function() {
+          $('.menu__list__childList').stop().slideUp();
+        });
+      });
       // 今回やるのはドロップメニューです。
       // メニューをhoverすると隠れている中のメニューが表示され、メニューから離れると中のメニューが非表示されるプログラムです。
       // [使用するメソッド]
