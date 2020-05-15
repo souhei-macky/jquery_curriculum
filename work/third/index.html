@@ -27,9 +27,7 @@
       $(function() {
         $('.nav').children().click(function(){
           var num = $(this).index();
-          $('.contents').children().addClass('is-hidden');
-          $('.contents').children().eq(num)
-          .removeClass('is-hidden');
+          $('.contents').children().addClass('is-hidden').eq(num).removeClass('is-hidden');
         });
       }); 
       // 今回やるのはタブメニューです。

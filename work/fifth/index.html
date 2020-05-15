@@ -87,19 +87,16 @@
       $(function() {
         $('.select').change(function() {
           var value = $(this).val();
-          if(value =='all') {
-            $('.list li').each(function(){
-              $(this).show()
-              });
-          } else {
-            $('.list li').each(function() {
-              if(value == $(this).data('category-type')) {
-                $(this).show();
-              } else {
-                $(this).hide();
-              }
-            })
-          }
+          $('.list').children().each(function(){
+            if(value == 'all') {
+              $(this).show();
+            } else if(value == $(this).data('category-type')) {
+              $(this).show();
+              console.log(this);
+            } else {
+              $(this).hide();
+            }
+          });
         });
       });
       // 今回やるのはソート機能です。

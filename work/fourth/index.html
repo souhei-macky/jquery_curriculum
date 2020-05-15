@@ -52,7 +52,7 @@
         $('.menu__list').children().hover(function() {
           $(this).children().stop().slideDown();
         }, function() {
-          $('.menu__list__childList').stop().slideUp();
+          $(this).children().next().stop().slideUp();
         });
       });
       // 今回やるのはドロップメニューです。
