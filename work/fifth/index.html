@@ -88,17 +88,15 @@
         $('.select').change(function() {
           var value = $(this).val();
           if(value == 'all') {
-            $('.list > li').each(function() {
-              $(this).show();
-              });
+            $('.list').children().show();
           } else {
-            $('.list > li').each(function(index, element) {
+            $('.list').children().each(function(index, element) {
               if(value == $(element).data('category-type')) {
                 $(element).show();
               } else {
                 $(element).hide();
               }
-            })
+            });
           }
         });
       });
