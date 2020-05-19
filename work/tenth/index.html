@@ -27,18 +27,165 @@
     <script src="../../common/js/jquery.js"></script>
     <script>
       $(function() {
-        $('#js-search-button').click(function() {
+        //下記、以前の書き方を一旦残しておく。
+
+        // var pageNum = 1;
+        // $('#js-search-button').on('click', function() {
+        //   $('.message').remove();
+        //   var searchWord = $('#js-search-word').val();
+        //   if (searchWord == "") {
+        //     var message = 
+        //       `<div class='message'>検索文字が空になっています。</div>`;
+        //       $('.search').after(message);
+        //   } else {
+        //     $.ajax({
+        //       url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
+        //       type: 'GET',
+        //       datatpye: 'json',
+        //       data: {
+        //         keyword: searchWord,
+        //         applicationId: '1019399324990976605',
+        //         booksGenreId: '001',
+        //         page: pageNum,
+        //         hits: 20
+        //       }
+        //     })
+        //     .done(function(data) {
+        
+        //       function itemList () {
+        //         $('.lists').empty();
+        //         $.each(data.Items, function item(index, value) {
+        //           var items =
+        //           `<li class='lists__item'>
+        //             <div class='lists__item__inner'>
+        //               <a href='${value.Item.itemUrl}' class='lists__item__link' target='_blank'>
+        //                 <img src='${value.Item.largeImageUrl}' class='lists__item__img' alt=''>
+        //                 <p class='lists__item__detail'>作品名：${value.Item.title}</p>
+        //                 <p class='lists__item__detail'>作者　：${value.Item.author}</p>
+        //                 <p class='lists__item__detail'>出版社：${value.Item.publisherName}</p>
+        //               </a>
+        //             </div>
+        //           </li>`;
+        //           $('.lists').append(items);
+        //         });
+        //       }
+
+        //       if(data.hits === 0) {
+        //         var message = 
+        //         `<div class='message'>検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</div>`;
+        //         $('.search').after(message);
+        //       } else {
+        //         itemList();
+        //         var pager =
+        //           `<div class="js-pager">
+        //             <ul class="btn-wrapper">
+        //               <li class="prev btn-item"><a class="btn-anchor" href="#">前へ</a></li>
+        //               <li class="next btn-item"><a class="btn-anchor" href="#">次へ</a></li>
+        //             </ul>
+        //           </div>`;
+        //         $('.js-pager').remove();
+        //         $('.lists').after(pager);
+        //         // $('.prev').addClass('disabled');
+        //         // $('.prev').on('click',function() {return false});
+        //         $('.next').on('click', function() {
+        //           pageNum += 1;
+        //           console.log(pageNum);
+        //           console.log(data);
+        //         });
+        //         // if (ページの先頭だった場合) {
+        //           // $('.prev').addClass('disabled');
+        //           // $('.prev').click(function() {return false});
+        //         // } else if (ページの最後だった場合){
+        //           // $('.next').addClass('disabled');
+        //           // $('.next').click(function() {return false});
+        //         // } 
+        //       };
+        //     })
+        //     .fail(function(data) {
+        //       var message = 
+        //       `<div class='message'>データ通信に失敗しました。<br>接続を確認してください。</div>`;
+        //       $('.search').after(message);
+        //     });
+        //   };
+        // });
+
+
+
+        // 下記、、関数などを使い、大幅に順番などを変えてページャ機能がうまくいくか検証
+        var pageNum = 1;
+
+        function notInputMessage() {
+          var message = 
+            `<div class='message'>検索文字が空になっています。</div>`;
+            $('.search').after(message);
+        }
+
+        function notHitMessage() {
+          var message = 
+            `<div class='message'>検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</div>`;
+            $('.search').after(message);
+        }
+
+        function failMessage() {
+          var message = 
+            `<div class='message'>データ通信に失敗しました。<br>接続を確認してください。</div>`;
+            $('.search').after(message);
+        }
+
+        function success(data) {
+          if(data.hits === 0) {
+            notHitMessage();
+          } else {
+            itemTemplate(data);
+            pagerTemplate();
+          }
+        }
+
+        function itemTemplate(data) {
           $('.lists').empty();
-          $('.message').remove();
+          $.each(data.Items, function item(index, value) {
+            var items =
+            `<li class='lists__item'>
+              <div class='lists__item__inner'>
+                <a href='${value.Item.itemUrl}' class='lists__item__link' target='_blank'>
+                  <img src='${value.Item.largeImageUrl}' class='lists__item__img' alt=''>
+                  <p class='lists__item__detail'>作品名：${value.Item.title}</p>
+                  <p class='lists__item__detail'>作者　：${value.Item.author}</p>
+                  <p class='lists__item__detail'>出版社：${value.Item.publisherName}</p>
+                </a>
+              </div>
+            </li>`
+            $('.lists').append(items);
+          });
+        }
+
+        function pagerTemplate(data) {
           $('.js-pager').remove();
+          var pager =
+            `<div class="js-pager">
+              <ul class="btn-wrapper">
+                <li class="prev btn-item"><a class="btn-anchor" href="#">前へ</a></li>
+                <li class="next btn-item"><a class="btn-anchor" href="#">次へ</a></li>
+              </ul>
+            </div>`
+          $('.lists').after(pager);
+          pagerClick();
+        }
+
+        function pagerClick() {
+          // if文で前へと次への条件分岐から行う
+          $('.next').on('click', function() {
+            pageNum += 1;
+            console.log(pageNum);
+            btnClick() 
+          });
+        }
+
+        function btnClick() {
+          $('.message').remove();
           var searchWord = $('#js-search-word').val();
           if (searchWord == "") {
-            // (searchWord == /[!=]{,1}/) 
-            //上記条件式で'searchWordの文字数の合計が1文字以下ならtrue'を正規表現を使って表したい
-            //問10の条件に入ってはいないので一度飛ばすことにする
-            var message = 
-              `<div class='message'>検索文字が空になっています。</div>`;
-              $('.search').after(message);
+            notInputMessage();
           } else {
             $.ajax({
               url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
@@ -48,64 +195,24 @@
                 keyword: searchWord,
                 applicationId: '1019399324990976605',
                 booksGenreId: '001',
-                page: 3,
+                page: pageNum,
                 hits: 20
-              },
+              }
             })
             .done(function(data) {
-              // console.log(data);
-              if(data.hits === 0){
-                var message = 
-                `<div class='message'>検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</div>`;
-                $('.search').after(message);
-              } else {
-                $.each(data.Items, function item(index, value) {
-                  var url = value.Item.itemUrl;
-                  var image = value.Item.largeImageUrl;
-                  var title = value.Item.title;
-                  var author = value.Item.author;
-                  var publisherName = value.Item.publisherName;
-                  var items =
-                  `<li class='lists__item'>
-                    <div class='lists__item__inner'>
-                      <a href='${url}' class='lists__item__link' target='_blank'>
-                        <img src='${image}' class='lists__item__img' alt=''>
-                        <p class='lists__item__detail'>作品名：${title}</p>
-                        <p class='lists__item__detail'>作者　：${author}</p>
-                        <p class='lists__item__detail'>出版社：${publisherName}</p>
-                      </a>
-                    </div>
-                  </li>`;
-                  $('.lists').append(items);
-                });
-                var pager =
-                  `<div class="js-pager">
-                    <ul class="btn-wrapper">
-                      <li class="prev btn-item"><a class="btn-anchor" href="#">前へ</a></li>
-                      <li class="next btn-item"><a class="btn-anchor" href="#">次へ</a></li>
-                    </ul>
-                  </div>`
-                $('.lists').after(pager);
-                $('.prev').addClass('disabled');
-                $('.prev').click(function() {return false});
-                // if (ページの先頭だった場合) {
-                  // $('.prev').addClass('disabled');
-                  // $('.prev').click(function() {return false});
-                // } else if (ページの最後だった場合){
-                  // $('.next').addClass('disabled');
-                  // $('.next').click(function() {return false});
-                // } 
-                //上記ページャー機能は完成していません。
-              };
+              success(data);
             })
-            .fail(function(data) {
-              var message = 
-              `<div class='message'>データ通信に失敗しました。<br>接続を確認してください。</div>`;
-              $('.search').after(message);
+            .fail(function() {
+              failMessage();
             });
-          };
+          }
+        }
+
+        $('#js-search-button').on('click', function(){
+          btnClick();
         });
       });
+    
       // 楽天ブックスの総合検索APIを使って製作してください。
       // answerの挙動を良く見てね！
       //
@@ -161,9 +268,6 @@
       // // </div>
       // //
       // //
-
-
-
     </script>
   </body>
 </html>
