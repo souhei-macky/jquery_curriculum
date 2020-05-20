@@ -82,7 +82,6 @@
         }
 
         function pagerClick(data) {
-          console.log(data);
           if (data.pageCount == 1) {
             $('.btn-item').addClass('disabled').click(function(){return false});
           } else if(pageNum == 1) {
@@ -96,10 +95,6 @@
             pegerClickPrev();
           }
         }
-
-        // function stopClick() {
-        //   $('.btn-wrapper').on('click', function() {return false})
-        // }
 
         function pegerClickNext() {
           $('.next').on('click', function() {
