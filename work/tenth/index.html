@@ -27,91 +27,6 @@
     <script src="../../common/js/jquery.js"></script>
     <script>
       $(function() {
-        //下記、以前の書き方を一旦残しておく。
-
-        // var pageNum = 1;
-        // $('#js-search-button').on('click', function() {
-        //   $('.message').remove();
-        //   var searchWord = $('#js-search-word').val();
-        //   if (searchWord == "") {
-        //     var message = 
-        //       `<div class='message'>検索文字が空になっています。</div>`;
-        //       $('.search').after(message);
-        //   } else {
-        //     $.ajax({
-        //       url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
-        //       type: 'GET',
-        //       datatpye: 'json',
-        //       data: {
-        //         keyword: searchWord,
-        //         applicationId: '1019399324990976605',
-        //         booksGenreId: '001',
-        //         page: pageNum,
-        //         hits: 20
-        //       }
-        //     })
-        //     .done(function(data) {
-        
-        //       function itemList () {
-        //         $('.lists').empty();
-        //         $.each(data.Items, function item(index, value) {
-        //           var items =
-        //           `<li class='lists__item'>
-        //             <div class='lists__item__inner'>
-        //               <a href='${value.Item.itemUrl}' class='lists__item__link' target='_blank'>
-        //                 <img src='${value.Item.largeImageUrl}' class='lists__item__img' alt=''>
-        //                 <p class='lists__item__detail'>作品名：${value.Item.title}</p>
-        //                 <p class='lists__item__detail'>作者　：${value.Item.author}</p>
-        //                 <p class='lists__item__detail'>出版社：${value.Item.publisherName}</p>
-        //               </a>
-        //             </div>
-        //           </li>`;
-        //           $('.lists').append(items);
-        //         });
-        //       }
-
-        //       if(data.hits === 0) {
-        //         var message = 
-        //         `<div class='message'>検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</div>`;
-        //         $('.search').after(message);
-        //       } else {
-        //         itemList();
-        //         var pager =
-        //           `<div class="js-pager">
-        //             <ul class="btn-wrapper">
-        //               <li class="prev btn-item"><a class="btn-anchor" href="#">前へ</a></li>
-        //               <li class="next btn-item"><a class="btn-anchor" href="#">次へ</a></li>
-        //             </ul>
-        //           </div>`;
-        //         $('.js-pager').remove();
-        //         $('.lists').after(pager);
-        //         // $('.prev').addClass('disabled');
-        //         // $('.prev').on('click',function() {return false});
-        //         $('.next').on('click', function() {
-        //           pageNum += 1;
-        //           console.log(pageNum);
-        //           console.log(data);
-        //         });
-        //         // if (ページの先頭だった場合) {
-        //           // $('.prev').addClass('disabled');
-        //           // $('.prev').click(function() {return false});
-        //         // } else if (ページの最後だった場合){
-        //           // $('.next').addClass('disabled');
-        //           // $('.next').click(function() {return false});
-        //         // } 
-        //       };
-        //     })
-        //     .fail(function(data) {
-        //       var message = 
-        //       `<div class='message'>データ通信に失敗しました。<br>接続を確認してください。</div>`;
-        //       $('.search').after(message);
-        //     });
-        //   };
-        // });
-
-
-
-        // 下記、、関数などを使い、大幅に順番などを変えてページャ機能がうまくいくか検証
 
         function notInputMessage() {
           var message = `<div class='message'>検索文字が空になっています。</div>`;
@@ -170,40 +85,40 @@
 
         function pagerClick(data) {
           console.log(data);
-          console.log(data.count);
-          console.log(data.pageCount);
-          // on()でclick()を省略して書くことができるはず
           if (data.pageCount == 1) {
-            $('.btn-item').addClass('disabled');
-            $('.btn-item').click(function(){return false})
+            $('.btn-item').addClass('disabled').click(function(){return false});
           } else if(pageNum == 1) {
-            $('.prev').addClass('disabled');
-            $('.prev').click(function(){return false});
-            $('.next').on('click', function() {
-              pageNum += 1;
-              btnClick() 
-            });
+            $('.prev').addClass('disabled').click(function(){return false});
+            pegerClickNext();
           } else if(pageNum == data.pageCount) {
-            $('.next').addClass('disabled');
-            $('.next').click(function(){return false});
-            $('.prev').on('click', function() {
-              pageNum -= 1;
-              btnClick() 
-            });
+            $('.next').addClass('disabled').click(function(){return false});
+            pegerClickPrev();
           } else {
-            $('.next').on('click', function() {
-              pageNum += 1;
-              btnClick() 
-            });
-            $('.prev').on('click', function() {
-              pageNum -= 1;
-              btnClick() 
-            });
+            pegerClickNext();
+            pegerClickPrev();
           }
-          
         }
 
-        function btnClick() {
+        // 上記return falseを省略できるのでは...
+        // function stopClick() {
+        //   $('.btn-wrapper').on('click', '.btn-item', function() {return false})
+        // }
+
+        function pegerClickNext() {
+          $('.next').on('click', function() {
+            pageNum += 1;
+            getAjax() 
+          });
+        }
+
+        function pegerClickPrev() {
+          $('.prev').on('click', function() {
+            pageNum -= 1;
+            getAjax() 
+          });
+        }
+
+        function getAjax() {
           $('.message').remove();
           var searchWord = $('#js-search-word').val();
           if (searchWord == "") {
@@ -230,9 +145,9 @@
           }
         }
 
-        var pageNum = 1;　//グローバル変数
+        var pageNum = 1;
         $('#js-search-button').on('click', function(){
-          btnClick();
+          getAjax();
         });
       });
     
