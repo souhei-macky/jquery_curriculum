@@ -112,24 +112,20 @@
 
 
         // 下記、、関数などを使い、大幅に順番などを変えてページャ機能がうまくいくか検証
-        var pageNum = 1;
 
         function notInputMessage() {
-          var message = 
-            `<div class='message'>検索文字が空になっています。</div>`;
-            $('.search').after(message);
+          var message = `<div class='message'>検索文字が空になっています。</div>`;
+          $('.search').after(message);
         }
 
         function notHitMessage() {
-          var message = 
-            `<div class='message'>検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</div>`;
-            $('.search').after(message);
+          var message = `<div class='message'>検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</div>`;
+          $('.search').after(message);
         }
 
         function failMessage() {
-          var message = 
-            `<div class='message'>データ通信に失敗しました。<br>接続を確認してください。</div>`;
-            $('.search').after(message);
+          var message = `<div class='message'>データ通信に失敗しました。<br>接続を確認してください。</div>`;
+          $('.search').after(message);
         }
 
         function success(data) {
@@ -137,7 +133,7 @@
             notHitMessage();
           } else {
             itemTemplate(data);
-            pagerTemplate();
+            pagerTemplate(data);
           }
         }
 
@@ -169,16 +165,42 @@
               </ul>
             </div>`
           $('.lists').after(pager);
-          pagerClick();
+          pagerClick(data);
         }
 
-        function pagerClick() {
-          // if文で前へと次への条件分岐から行う
-          $('.next').on('click', function() {
-            pageNum += 1;
-            console.log(pageNum);
-            btnClick() 
-          });
+        function pagerClick(data) {
+          console.log(data);
+          console.log(data.count);
+          console.log(data.pageCount);
+          // on()でclick()を省略して書くことができるはず
+          if (data.pageCount == 1) {
+            $('.btn-item').addClass('disabled');
+            $('.btn-item').click(function(){return false})
+          } else if(pageNum == 1) {
+            $('.prev').addClass('disabled');
+            $('.prev').click(function(){return false});
+            $('.next').on('click', function() {
+              pageNum += 1;
+              btnClick() 
+            });
+          } else if(pageNum == data.pageCount) {
+            $('.next').addClass('disabled');
+            $('.next').click(function(){return false});
+            $('.prev').on('click', function() {
+              pageNum -= 1;
+              btnClick() 
+            });
+          } else {
+            $('.next').on('click', function() {
+              pageNum += 1;
+              btnClick() 
+            });
+            $('.prev').on('click', function() {
+              pageNum -= 1;
+              btnClick() 
+            });
+          }
+          
         }
 
         function btnClick() {
@@ -208,6 +230,7 @@
           }
         }
 
+        var pageNum = 1;　//グローバル変数
         $('#js-search-button').on('click', function(){
           btnClick();
         });
