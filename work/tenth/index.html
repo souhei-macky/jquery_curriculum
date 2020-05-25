@@ -53,35 +53,70 @@
 
       var pageNum = [];
 
-      function notInputMessage() {
+      function deleteAction() {
         $('.message').remove();
         $('.lists').empty();
-        var message = "<div class='message'>検索文字が空,もしくは漢字以外の1文字になっています。</div>";
+      }
+
+      function notInputMessage() {
+        deleteAction();
+        var message = 
+          "<div class='message'>"+
+            "検索文字が空,もしくは漢字以外の1文字になっています。"+
+          "</div>";
         $('.search').after(message);
       }
 
       function notExpectationMessage() {
         $('.message').remove();
-        var message = "<div class='message'>予期せぬエラーが発生しました。</div>";
+        var message = 
+          "<div class='message'>"+
+            "予期せぬエラーが発生しました。"+
+          "</div>";
         $('.search').after(message);
       }
 
       function notConnectionMessage() {
-        $('.message').remove();
-        $('.lists').empty();
-        var message = "<div class='message'>通信に失敗しました。インターネットの接続をご確認ください。</div>";
+        deleteAction();
+        var message = 
+          "<div class='message'>"+
+            "通信に失敗しました。インターネットの接続をご確認ください。"+
+          "</div>";
         $('.search').after(message);
       }
 
       function notHitMessage() {
-        $('.message').remove();
-        $('.lists').empty();
-        var message = "<div class='message'>検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</div>";
+        deleteAction();
+        var message = 
+          "<div class='message'>"+
+            "検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。"+
+          "</div>";
+        $('.search').after(message);
+      }
+
+      function systemErrorMessage() {
+        deleteAction();
+        var message = 
+          "<div class='message'>"+
+            "システムエラーです。長時間続くようであれば、"+
+            "<a href='https://webservice.faq.rakuten.co.jp/app/ask1/'>"+
+              "こちらよりごお問い合わせください。"+
+            "</a>"+
+          "</div>";
+        $('.search').after(message);
+      }
+
+      function serverDownMessage() {
+        deleteAction();
+        var message = 
+          "<div class='message'>"+
+           "アクセスが殺到しています。しばらくしてからご利用ください。"
+          "</div>";
         $('.search').after(message);
       }
 
       function success(data) {
-        if(data.hits === 0) {
+        if(data.hits == 0) {
           notHitMessage();
         } else {
           itemTemplate(data);
@@ -91,11 +126,19 @@
       }
 
       function itemTemplate(data) {
-        $('.message').remove();
-        $('.lists').empty();
+        deleteAction();
         $.each(data.Items, function(index, value) {
           var items =
-          "<li class='lists__item'><div class='lists__item__inner'><a href='"+value.Item.itemUrl+"' class='lists__item__link' target='_blank'><img src='"+value.Item.largeImageUrl+"' class='lists__item__img' alt=''><p class='lists__item__detail'>作品名："+value.Item.title+"</p><p class='lists__item__detail'>作者："+value.Item.author+"</p><p class='lists__item__detail'>出版社："+value.Item.publisherName+"</p></a></div></li>"
+          "<li class='lists__item'>"+
+            "<div class='lists__item__inner'>"+
+              "<a href='"+value.Item.itemUrl+"' class='lists__item__link' target='_blank'>"+
+                "<img src='"+value.Item.largeImageUrl+"' class='lists__item__img' alt=''>"+
+                "<p class='lists__item__detail'>作品名："+value.Item.title+"</p>"+
+                "<p class='lists__item__detail'>作者："+value.Item.author+"</p>"+
+                "<p class='lists__item__detail'>出版社："+value.Item.publisherName+"</p>"+
+              "</a>"+
+            "</div>"+
+          "</li>"
           $('.lists').append(items);
         });
       }
@@ -103,16 +146,25 @@
       function pagerTemplate() {
         $('.js-pager').remove();
         var pager =
-          '<div class="js-pager"><ul class="btn-wrapper"><li class="prev btn-item"><a class="btn-anchor" href="#">前へ</a></li><li class="next btn-item"><a class="btn-anchor" href="#">次へ</a></li></ul></div>'
+          '<div class="js-pager">'+
+            '<ul class="btn-wrapper">'+
+              '<li class="prev btn-item">'+
+                '<a class="btn-anchor" href="#">前へ</a>'+
+              '</li>'+
+              '<li class="next btn-item">'+
+                '<a class="btn-anchor" href="#">次へ</a>'+
+              '</li>'+
+            '</ul>'+
+          '</div>'
         $('.lists').after(pager);
       }
 
       function pagerClick(data) {
-        if (data.pageCount === 1) {
+        if (data.pageCount == 1) {
           $('.btn-item').addClass('disabled');
-        } else if (pageNum ===1) {
+        } else if (pageNum == 1) {
           $('.prev').addClass('disabled');
-        } else if(pageNum === data.pageCount) {
+        } else if(pageNum == data.pageCount) {
           $('.next').addClass('disabled');
         }
       }
@@ -135,13 +187,17 @@
           success(data);
         })
         .fail(function(data) {
-          if(navigator.onLine) {
-            if(data.status == 429) {
-              notExpectationMessage();
-            } else {
-              notInputMessage();
-            }
-          } else {
+          if(data.status == 400) {
+            notInputMessage();
+          } else if(data.status == 404) {
+            notHitMessage();
+          } else if(data.status == 429) {
+            notExpectationMessage();
+          } else if(data.status == 500) {
+            systemErrorMessage();
+          } else if(data.status == 503) {
+            serverDownMessage();
+          } else if(navigator.onLine == false) {
             notConnectionMessage();
           }
         });
