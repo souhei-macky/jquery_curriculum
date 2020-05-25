@@ -94,6 +94,15 @@
         $('.search').after(message);
       }
 
+      function notFoundMessage() {
+        deleteAction();
+        var message = 
+          "<div class='message'>"+
+            "402 not found。<br>このページはご覧いただけません"+
+          "</div>";
+        $('.search').after(message);
+      }
+
       function systemErrorMessage() {
         deleteAction();
         var message = 
@@ -190,7 +199,7 @@
           if(data.status == 400) {
             notInputMessage();
           } else if(data.status == 404) {
-            notHitMessage();
+            notFoundMessage();
           } else if(data.status == 429) {
             notExpectationMessage();
           } else if(data.status == 500) {
