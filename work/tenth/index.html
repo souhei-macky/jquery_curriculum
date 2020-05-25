@@ -108,11 +108,11 @@
       }
 
       function pagerClick(data) {
-        if (data.pageCount == 1) {
+        if (data.pageCount === 1) {
           $('.btn-item').addClass('disabled');
-        } else if (pageNum == 1) {
+        } else if (pageNum ===1) {
           $('.prev').addClass('disabled');
-        } else if(pageNum == data.pageCount) {
+        } else if(pageNum === data.pageCount) {
           $('.next').addClass('disabled');
         }
       }
