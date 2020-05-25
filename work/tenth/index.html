@@ -29,7 +29,7 @@
       $(function() {
         $(document).on('click', '#js-search-button', function() {
           pageNum = 1;
-          getAjax();
+          fetchBookData();
         });
 
         $(document).on('click', '.prev', function() {
@@ -37,7 +37,7 @@
             return false;
           } else {
             pageNum -= 1;
-            getAjax();
+            fetchBookData();
           }
         });
 
@@ -46,87 +46,26 @@
             return false;
           } else {
             pageNum += 1;
-            getAjax();
+            fetchBookData();
           }
         });
       });
 
       var pageNum = [];
 
-      function deleteAction() {
+      function showMessage(message) {
         $('.message').remove();
         $('.lists').empty();
-      }
-
-      function notInputMessage() {
-        deleteAction();
-        var message = 
-          "<div class='message'>"+
-            "検索文字が空,もしくは漢字以外の1文字になっています。"+
-          "</div>";
-        $('.search').after(message);
-      }
-
-      function notExpectationMessage() {
-        $('.message').remove();
-        var message = 
-          "<div class='message'>"+
-            "予期せぬエラーが発生しました。"+
-          "</div>";
-        $('.search').after(message);
-      }
-
-      function notConnectionMessage() {
-        deleteAction();
-        var message = 
-          "<div class='message'>"+
-            "通信に失敗しました。インターネットの接続をご確認ください。"+
-          "</div>";
-        $('.search').after(message);
-      }
-
-      function notHitMessage() {
-        deleteAction();
-        var message = 
-          "<div class='message'>"+
-            "検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。"+
-          "</div>";
-        $('.search').after(message);
-      }
-
-      function notFoundMessage() {
-        deleteAction();
-        var message = 
-          "<div class='message'>"+
-            "402 not found。<br>このページはご覧いただけません"+
-          "</div>";
-        $('.search').after(message);
-      }
-
-      function systemErrorMessage() {
-        deleteAction();
-        var message = 
-          "<div class='message'>"+
-            "システムエラーです。長時間続くようであれば、"+
-            "<a href='https://webservice.faq.rakuten.co.jp/app/ask1/'>"+
-              "こちらよりごお問い合わせください。"+
-            "</a>"+
-          "</div>";
-        $('.search').after(message);
-      }
-
-      function serverDownMessage() {
-        deleteAction();
-        var message = 
-          "<div class='message'>"+
-           "アクセスが殺到しています。しばらくしてからご利用ください。"
-          "</div>";
         $('.search').after(message);
       }
 
       function success(data) {
-        if(data.hits == 0) {
-          notHitMessage();
+        if(data.hits === 0) {
+          var message = 
+            "<div class='message'>"+
+              "検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。"+
+            "</div>";
+          showMessage(message);
         } else {
           itemTemplate(data);
           pagerTemplate();
@@ -135,7 +74,8 @@
       }
 
       function itemTemplate(data) {
-        deleteAction();
+        $('.message').remove();
+        $('.lists').empty();
         $.each(data.Items, function(index, value) {
           var items =
           "<li class='lists__item'>"+
@@ -169,16 +109,17 @@
       }
 
       function pagerClick(data) {
-        if (data.pageCount == 1) {
+        if (data.pageCount === 1) {
           $('.btn-item').addClass('disabled');
-        } else if (pageNum == 1) {
+        } else if (pageNum === 1) {
           $('.prev').addClass('disabled');
-        } else if(pageNum == data.pageCount) {
+        } else if(pageNum === data.pageCount) {
           $('.next').addClass('disabled');
         }
       }
 
-      function getAjax(){
+      // 楽天ブックス総合検索APIで必要な情報を取得
+      function fetchBookData(){
         var searchWord = $('#js-search-word').val();
         $.ajax({
           url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
@@ -196,18 +137,54 @@
           success(data);
         })
         .fail(function(data) {
-          if(data.status == 400) {
-            notInputMessage();
-          } else if(data.status == 404) {
-            notFoundMessage();
-          } else if(data.status == 429) {
-            notExpectationMessage();
-          } else if(data.status == 500) {
-            systemErrorMessage();
-          } else if(data.status == 503) {
-            serverDownMessage();
-          } else if(navigator.onLine == false) {
-            notConnectionMessage();
+          if(data.status === 400) {
+            var message = 
+              "<div class='message'>"+
+                "検索文字が空,もしくは漢字以外の1文字になっています。"+
+              "</div>";
+            showMessage(message);
+          } else if(data.status === 404) {
+            var message = 
+              "<div class='message'>"+
+                "404 not found。<br>このページはご覧いただけません"+
+              "</div>";
+            showMessage(message);
+          } else if(data.status === 429) {
+            var message = 
+              "<div class='message'>"+
+                "予期せぬエラーが発生しました。"+
+              "</div>";
+            showMessage(message);
+          } else if(data.status === 500) {
+            var message = 
+              "<div class='message'>"+
+                "システムエラーです。長時間続くようであれば、"+
+                "<a href='https://webservice.faq.rakuten.co.jp/app/ask1/'>"+
+                  "こちらよりごお問い合わせください。"+
+                "</a>"+
+              "</div>";
+            showMessage(message);
+          } else if(data.status === 503) {
+            var message = 
+              "<div class='message'>"+
+                "アクセスが殺到しています。しばらくしてからご利用ください。"
+              "</div>";
+            showMessage(message);
+          } else if(data.status === 0) {
+            var message = 
+              "<div class='message'>"+
+                "通信に失敗しました。インターネットの接続をご確認ください。"+
+              "</div>";
+            showMessage(message);
+          } else {
+            var message = 
+              "<div class='message'>"+
+                "予期せぬエラーが発生しました。長時間続くようであれば、<br>"+
+                "<a href='https://webservice.faq.rakuten.co.jp/app/ask1/'>"+
+                  "こちらよりごお問い合わせください。"+
+                "</a>"+
+              "</div>";
+            showMessage(message);
           }
         });
       }
