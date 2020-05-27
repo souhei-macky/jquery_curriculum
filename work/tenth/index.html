@@ -27,7 +27,7 @@
     <script src="../../common/js/jquery.js"></script>
     <script>
       $(function() {
-        $(document).on('click', '#js-search-button', function() {
+        $('#js-search-button').click(function() {
           pageNum = 1;
           fetchBookData();
         });
@@ -53,19 +53,36 @@
 
       var pageNum = [];
 
-      function showMessage(message) {
+      function fetchBookData(){
         $('.message').remove();
         $('.lists').empty();
-        $('.search').after(message);
+        var searchWord = $('#js-search-word').val();
+        $.ajax({
+          url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
+          type: 'GET',
+          datatpye: 'json',
+          data: {
+            "keyword": searchWord,
+            "applicationId": "1019399324990976605",
+            "booksGenreId": "001",
+            "page": pageNum,
+            "hits": 20
+          }
+        })
+        .done(function(data) {
+          success(data);
+        })
+        .fail(function(data) {
+          failShowMessage(data);
+        });
       }
 
       function success(data) {
         if(data.hits === 0) {
+          $('.message').remove();
           var message = 
-            "<div class='message'>"+
-              "検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。"+
-            "</div>";
-          showMessage(message);
+            "検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。"
+          $('.lists').before("<div class='message'>"+message+"</div>");
         } else {
           itemTemplate(data);
           pagerTemplate();
@@ -73,9 +90,44 @@
         }
       }
 
+      function failShowMessage(data) {
+        $('.message').remove();
+        switch (data.status) {
+          case 0:
+            var message = "通信に失敗しました。インターネットの接続をご確認ください。";
+            break;
+          case 400:
+            var message = "検索文字が空,もしくは漢字以外の1文字になっています。";
+            break;
+          case 404:
+            var message = "404 not found。<br>このページはご覧いただけません";
+            break;
+          case 429:
+            var message = "予期せぬエラーが発生しました。";
+            break;
+          case 500:
+            var message = 
+              "システムエラーです。長時間続くようであれば、"+
+              "<a href='https://webservice.faq.rakuten.co.jp/app/ask1/'>"+
+                "こちらよりごお問い合わせください。"+
+              "</a>"
+            break;
+          case 503:
+            var message = "アクセスが殺到しています。しばらくしてからご利用ください。";
+            break;
+          default:
+            var message =
+            "予期せぬエラーが発生しました。長時間続くようであれば、<br>"+
+              "<a href='https://webservice.faq.rakuten.co.jp/app/ask1/'>"+
+                "こちらよりごお問い合わせください。"+
+              "</a>";
+            break;
+        }
+        $('.lists').before("<div class='message'>"+message+"</div>");
+      }
+
       function itemTemplate(data) {
         $('.message').remove();
-        $('.lists').empty();
         $.each(data.Items, function(index, value) {
           var items =
           "<li class='lists__item'>"+
@@ -119,75 +171,7 @@
       }
 
       // 楽天ブックス総合検索APIで必要な情報を取得
-      function fetchBookData(){
-        var searchWord = $('#js-search-word').val();
-        $.ajax({
-          url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
-          type: 'GET',
-          datatpye: 'json',
-          data: {
-            "keyword": searchWord,
-            "applicationId": "1019399324990976605",
-            "booksGenreId": "001",
-            "page": pageNum,
-            "hits": 20
-          }
-        })
-        .done(function(data) {
-          success(data);
-        })
-        .fail(function(data) {
-          if(data.status === 400) {
-            var message = 
-              "<div class='message'>"+
-                "検索文字が空,もしくは漢字以外の1文字になっています。"+
-              "</div>";
-            showMessage(message);
-          } else if(data.status === 404) {
-            var message = 
-              "<div class='message'>"+
-                "404 not found。<br>このページはご覧いただけません"+
-              "</div>";
-            showMessage(message);
-          } else if(data.status === 429) {
-            var message = 
-              "<div class='message'>"+
-                "予期せぬエラーが発生しました。"+
-              "</div>";
-            showMessage(message);
-          } else if(data.status === 500) {
-            var message = 
-              "<div class='message'>"+
-                "システムエラーです。長時間続くようであれば、"+
-                "<a href='https://webservice.faq.rakuten.co.jp/app/ask1/'>"+
-                  "こちらよりごお問い合わせください。"+
-                "</a>"+
-              "</div>";
-            showMessage(message);
-          } else if(data.status === 503) {
-            var message = 
-              "<div class='message'>"+
-                "アクセスが殺到しています。しばらくしてからご利用ください。"
-              "</div>";
-            showMessage(message);
-          } else if(data.status === 0) {
-            var message = 
-              "<div class='message'>"+
-                "通信に失敗しました。インターネットの接続をご確認ください。"+
-              "</div>";
-            showMessage(message);
-          } else {
-            var message = 
-              "<div class='message'>"+
-                "予期せぬエラーが発生しました。長時間続くようであれば、<br>"+
-                "<a href='https://webservice.faq.rakuten.co.jp/app/ask1/'>"+
-                  "こちらよりごお問い合わせください。"+
-                "</a>"+
-              "</div>";
-            showMessage(message);
-          }
-        });
-      }
+      
 
       // 楽天ブックスの総合検索APIを使って製作してください。
       // answerの挙動を良く見てね！
