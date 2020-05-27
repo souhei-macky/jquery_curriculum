@@ -80,8 +80,7 @@
       function success(data) {
         if(data.hits === 0) {
           $('.message').remove();
-          var message = 
-            "検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。"
+          var message = "検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。";
           $('.lists').before("<div class='message'>"+message+"</div>");
         } else {
           itemTemplate(data);
@@ -169,9 +168,6 @@
           $('.next').addClass('disabled');
         }
       }
-
-      // 楽天ブックス総合検索APIで必要な情報を取得
-      
 
       // 楽天ブックスの総合検索APIを使って製作してください。
       // answerの挙動を良く見てね！
