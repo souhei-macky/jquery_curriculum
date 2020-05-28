@@ -30,7 +30,7 @@
         $('#js-search-button').click(function() {
           searchWord = $('#js-search-word').val();
           pageNum = 1;
-          fetchBookData(searchWord);
+          fetchBookData();
         });
 
         $(document).on('click', '.prev', function() {
@@ -38,7 +38,7 @@
             return false;
           } else {
             pageNum -- ;
-            fetchBookData(searchWord);
+            fetchBookData();
           }
         });
 
@@ -47,7 +47,7 @@
             return false;
           } else {
             pageNum ++ ;
-            fetchBookData(searchWord);
+            fetchBookData();
           }
         });
       });
@@ -55,7 +55,7 @@
       var searchWord;
       var pageNum;
 
-      function fetchBookData(searchWord){
+      function fetchBookData(){
         $('.message').remove();
         $('.lists').empty();
         $.ajax({
