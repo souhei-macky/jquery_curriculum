@@ -28,16 +28,17 @@
     <script>
       $(function() {
         $('#js-search-button').click(function() {
+          searchWord = $('#js-search-word').val();
           pageNum = 1;
-          fetchBookData();
+          fetchBookData(searchWord);
         });
 
         $(document).on('click', '.prev', function() {
           if($(this).hasClass('disabled')) {
             return false;
           } else {
-            pageNum -= 1;
-            fetchBookData();
+            pageNum -- ;
+            fetchBookData(searchWord);
           }
         });
 
@@ -45,18 +46,18 @@
           if($(this).hasClass('disabled')) {
             return false;
           } else {
-            pageNum += 1;
-            fetchBookData();
+            pageNum ++ ;
+            fetchBookData(searchWord);
           }
         });
       });
 
-      var pageNum = [];
+      var searchWord;
+      var pageNum;
 
-      function fetchBookData(){
+      function fetchBookData(searchWord){
         $('.message').remove();
         $('.lists').empty();
-        var searchWord = $('#js-search-word').val();
         $.ajax({
           url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
           type: 'GET',
@@ -69,27 +70,26 @@
             "hits": 20
           }
         })
-        .done(function(data) {
-          success(data);
+        .done(function(responseData) {
+          successProcess(responseData);
         })
-        .fail(function(data) {
-          failShowMessage(data);
+        .fail(function(responseData) {
+          showFailMessage(responseData);
         });
       }
 
-      function success(data) {
+      function successProcess(data) {
+        console.log(data);
         if(data.hits === 0) {
           $('.message').remove();
-          var message = "検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。";
-          $('.lists').before("<div class='message'>"+message+"</div>");
+          $('.lists').before("<div class='message'>検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</div>");
         } else {
-          itemTemplate(data);
-          pagerTemplate();
-          pagerClick(data);
+          showBooksData(data.Items);
+          showPajerButton(data.pageCount);
         }
       }
 
-      function failShowMessage(data) {
+      function showFailMessage(data) {
         $('.message').remove();
         switch (data.status) {
           case 0:
@@ -125,26 +125,27 @@
         $('.lists').before("<div class='message'>"+message+"</div>");
       }
 
-      function itemTemplate(data) {
-        $.each(data.Items, function(index, value) {
-          var items =
+      function showBooksData(books) {
+        var li = '';
+        $.each(books, function(index, book) {
+          li +=
           "<li class='lists__item'>"+
             "<div class='lists__item__inner'>"+
-              "<a href='"+value.Item.itemUrl+"' class='lists__item__link' target='_blank'>"+
-                "<img src='"+value.Item.largeImageUrl+"' class='lists__item__img' alt=''>"+
-                "<p class='lists__item__detail'>作品名："+value.Item.title+"</p>"+
-                "<p class='lists__item__detail'>作者："+value.Item.author+"</p>"+
-                "<p class='lists__item__detail'>出版社："+value.Item.publisherName+"</p>"+
+              "<a href='"+book.Item.itemUrl+"' class='lists__item__link' target='_blank'>"+
+                "<img src='"+book.Item.largeImageUrl+"' class='lists__item__img' alt=''>"+
+                "<p class='lists__item__detail'>作品名："+book.Item.title+"</p>"+
+                "<p class='lists__item__detail'>作者："+book.Item.author+"</p>"+
+                "<p class='lists__item__detail'>出版社："+book.Item.publisherName+"</p>"+
               "</a>"+
             "</div>"+
           "</li>"
-          $('.lists').append(items);
         });
+        $('.lists').html(li);
       }
 
-      function pagerTemplate() {
+      function showPajerButton(pageCount) {
         $('.js-pager').remove();
-        var pager =
+        var li =
           '<div class="js-pager">'+
             '<ul class="btn-wrapper">'+
               '<li class="prev btn-item">'+
@@ -155,18 +156,16 @@
               '</li>'+
             '</ul>'+
           '</div>'
-        $('.lists').after(pager);
-      }
-
-      function pagerClick(data) {
-        if (data.pageCount === 1) {
+        $('.lists').after(li);
+        if (pageCount === 1) {
           $('.btn-item').addClass('disabled');
         } else if (pageNum === 1) {
           $('.prev').addClass('disabled');
-        } else if(pageNum === data.pageCount) {
+        } else if(pageNum === pageCount) {
           $('.next').addClass('disabled');
         }
       }
+
 
       // 楽天ブックスの総合検索APIを使って製作してください。
       // answerの挙動を良く見てね！
